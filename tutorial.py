@@ -9,120 +9,133 @@ from sklearn.metrics import mean_absolute_error
 citydata = pd.read_csv('cityData.csv')
 citydata
 
-train = np.zeros((5,20-3+1,11,548,421)) #initialize an empty 5D tensor
-print('start processing traindata')
-with open('forecastDataforTraining.csv') as trainfile:
-    for index,line in enumerate(trainfile):
-        #traindata format
-        #xid,yid,date_id,hour,model,wind
-        #1,1,1,3,1,13.8
+def loadData():
+    '''
+    This function reads in all the CSV data and saves it to an
+    hdf5 file
+    '''
+    global train, test
+    train = np.zeros((5,20-3+1,11,548,421)) # initialize an empty 5D tensor
+    print('start processing traindata')
+    with open('forecastDataforTraining.csv') as trainfile:
+        for index,line in enumerate(trainfile):
+            # traindata format
+            # xid,yid,date_id,hour,model,wind
+            # 1,1,1,3,1,13.8
 
-        traindata = line.split(',')
-        try:
-            x = int(traindata[0])
-            y = int(traindata[1])
-            d = int(traindata[2])
-            h = int(traindata[3])
-            m = int(traindata[4])
-            w = float(traindata[5])
-            train[d-1,h-3,m-1,x-1,y-1] = w # write values into tensor
+            traindata = line.split(',')
+            try:
+                x = int(traindata[0])
+                y = int(traindata[1])
+                d = int(traindata[2])
+                h = int(traindata[3])
+                m = int(traindata[4])
+                w = float(traindata[5])
+                train[d-1,h-3,m-1,x-1,y-1] = w # write values into tensor
 
-            if index%1000000==0:
-                print(index,"lines have been processed")
-        except ValueError:
-            print("found line with datatype error! skip this line")
-            continue
+                if index%1000000==0:
+                    print(index,"lines have been processed")
+            except ValueError:
+                print("found line with datatype error! skip this line")
+                continue
 
-print('start processing labeldata')
-with open('insituMeasurementforTraining.csv') as labelfile:
-    for index,line in enumerate(labelfile):
-        #labeldata format
-        #xid,yid,date_id,hour,wind
-        #1,1,1,3,12.8
-        labeldata = line.split(',')
-        try:
-            lx = int(labeldata[0])
-            ly = int(labeldata[1])
-            ld = int(labeldata[2])
-            lh = int(labeldata[3])
-            lw = float(labeldata[4])
-            train[ld-1,lh-3,10,lx-1,ly-1] = lw
-            if index%1000000==0:
-                print(index,"lines have been processed")
-        except ValueError:
-            print("found line with datatype error! skip this line")
-            continue
+    print('start processing labeldata')
+    with open('insituMeasurementforTraining.csv') as labelfile:
+        for index,line in enumerate(labelfile):
+            # labeldata format
+            # xid,yid,date_id,hour,wind
+            # 1,1,1,3,12.8
+            labeldata = line.split(',')
+            try:
+                lx = int(labeldata[0])
+                ly = int(labeldata[1])
+                ld = int(labeldata[2])
+                lh = int(labeldata[3])
+                lw = float(labeldata[4])
+                train[ld-1,lh-3,10,lx-1,ly-1] = lw
+                if index%1000000==0:
+                    print(index,"lines have been processed")
+            except ValueError:
+                print("found line with datatype error! skip this line")
+                continue
 
-test = np.zeros((5,20-3+1,10,548,421))
-print('start processing testdata')
-with open('forecastDataforTesting.csv') as testfile:
-    for index,line in enumerate(testfile):
-        #testdata format
-        #xid,yid,date_id,hour,model,wind
-        #1,1,1,3,1,13.8
+    test = np.zeros((5,20-3+1,10,548,421))
+    print('start processing testdata')
+    with open('forecastDataforTesting.csv') as testfile:
+        for index,line in enumerate(testfile):
+            # testdata format
+            # xid,yid,date_id,hour,model,wind
+            # 1,1,1,3,1,13.8
 
-        testdata = line.split(',')
-        try:
-            x = int(testdata[0])
-            y = int(testdata[1])
-            d = int(testdata[2])
-            h = int(testdata[3])
-            m = int(testdata[4])
-            w = float(testdata[5])
-            test[d-6,h-3,m-1,x-1,y-1] = w
+            testdata = line.split(',')
+            try:
+                x = int(testdata[0])
+                y = int(testdata[1])
+                d = int(testdata[2])
+                h = int(testdata[3])
+                m = int(testdata[4])
+                w = float(testdata[5])
+                test[d-6,h-3,m-1,x-1,y-1] = w
 
-            if index%1000000==0:
-                print(index,"lines have been processed")
-        except ValueError:
-            print("found line with datatype error! skip this line")
-            continue
+                if index%1000000==0:
+                    print(index,"lines have been processed")
+            except ValueError:
+                print("found line with datatype error! skip this line")
+                continue
 
-train.shape
-train
+    # write numpy arrary tensor into h5 format
+    h5f = h5py.File('METdata.h5', 'w')
+    h5f.create_dataset('train', data=train)
+    h5f.create_dataset('test', data=test)
+    h5f.close()
 
-# write numpy arrary tensor into h5 format
-h5f = h5py.File('METdata.h5', 'w')
-h5f.create_dataset('train', data=train)
-h5f.create_dataset('test', data=test)
-h5f.close()
+def readData():
+    '''
+    This function reads in the hdf5 file
+    '''
+    # read h5 format back to numpy array
+    global train, test
+    h5f = h5py.File('METdata.h5', 'r')
+    train = h5f['train'][:]
+    test = h5f['test'][:]
+    h5f.close()
 
-# read h5 format back to numpy array
-h5f = h5py.File('METdata.h5', 'r')
-train = h5f['train'][:]
-test = h5f['test'][:]
-h5f.close()
+# loadData()
 
-# print 548*421*18*5*10
-# print train.shape
+readData()
 
-# plt.figure(figsize=(20,10))
-# plt.imshow(train[0,0,0,:,:].T)
-# for c,x,y in zip(citydata.cid,citydata.xid,citydata.yid):
-#     if c == 0:
-#         plt.plot(x-1,y-1,'yo')
-#     else:
-#         plt.plot(x-1,y-1,'ro')
-# plt.show()
+print(train.shape)
 
-# plt.figure(figsize=(20,10))
-# plt.imshow(train[0,0,10,:,:].T)
-# for c,x,y in zip(citydata.cid,citydata.xid,citydata.yid):
-#     if c == 0:
-#         plt.plot(x-1,y-1,'yo')
-#     else:
-#         plt.plot(x-1,y-1,'ro')
-# plt.show()
+print(548*421*18*5*10)
 
-# train[0,0,10,:,:].T-train[0,0,0,:,:].T
+plt.figure(figsize=(20,10))
+plt.imshow(train[0,0,0,:,:].T)
+for c,x,y in zip(citydata.cid,citydata.xid,citydata.yid):
+    if c == 0:
+        plt.plot(x-1,y-1,'yo')
+    else:
+        plt.plot(x-1,y-1,'ro')
+plt.show()
 
-# plt.figure(figsize=(20,10))
-# plt.imshow(test[0,0,1,:,:].T)
-# for c,x,y in zip(citydata.cid,citydata.xid,citydata.yid):
-#     if c == 0:
-#         plt.plot(x-1,y-1,'yo')
-#     else:
-#         plt.plot(x-1,y-1,'ro')
-# plt.show()
+plt.figure(figsize=(20,10))
+plt.imshow(train[0,0,10,:,:].T)
+for c,x,y in zip(citydata.cid,citydata.xid,citydata.yid):
+    if c == 0:
+        plt.plot(x-1,y-1,'yo')
+    else:
+        plt.plot(x-1,y-1,'ro')
+plt.show()
+
+train[0,0,10,:,:].T-train[0,0,0,:,:].T
+
+plt.figure(figsize=(20,10))
+plt.imshow(test[0,0,1,:,:].T)
+for c,x,y in zip(citydata.cid,citydata.xid,citydata.yid):
+    if c == 0:
+        plt.plot(x-1,y-1,'yo')
+    else:
+        plt.plot(x-1,y-1,'ro')
+plt.show()
 
 # citydata
 
