@@ -10,7 +10,7 @@ citydata = pd.read_csv('cityData.csv')
 citydata
 
 train = np.zeros((5,20-3+1,11,548,421)) #initialize an empty 5D tensor
-print 'start processing traindata'
+print('start processing traindata')
 with open('forecastDataforTraining.csv') as trainfile:
     for index,line in enumerate(trainfile):
         #traindata format
@@ -28,12 +28,12 @@ with open('forecastDataforTraining.csv') as trainfile:
             train[d-1,h-3,m-1,x-1,y-1] = w # write values into tensor
 
             if index%1000000==0:
-                print '%i lines has been processed' %(index)
+                print(index,"lines have been processed")
         except ValueError:
-            print "found line with datatype error! skip this line"
+            print("found line with datatype error! skip this line")
             continue
 
-print 'start processing labeldata'
+print('start processing labeldata')
 with open('insituMeasurementforTraining.csv') as labelfile:
     for index,line in enumerate(labelfile):
         #labeldata format
@@ -48,13 +48,13 @@ with open('insituMeasurementforTraining.csv') as labelfile:
             lw = float(labeldata[4])
             train[ld-1,lh-3,10,lx-1,ly-1] = lw
             if index%1000000==0:
-                print '%i lines has been processed' %(index)
+                print(index,"lines have been processed")
         except ValueError:
-            print "found line with datatype error! skip this line"
+            print("found line with datatype error! skip this line")
             continue
 
 test = np.zeros((5,20-3+1,10,548,421))
-print 'start processing testdata'
+print('start processing testdata')
 with open('forecastDataforTesting.csv') as testfile:
     for index,line in enumerate(testfile):
         #testdata format
@@ -72,9 +72,9 @@ with open('forecastDataforTesting.csv') as testfile:
             test[d-6,h-3,m-1,x-1,y-1] = w
 
             if index%1000000==0:
-                print '%i lines has been processed' %(index)
+                print(index,"lines have been processed")
         except ValueError:
-            print "found line with datatype error! skip this line"
+            print("found line with datatype error! skip this line")
             continue
 
 train.shape
