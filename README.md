@@ -8,4 +8,4 @@ The training data set contained 10 forecasts of wind speed from Met Office model
 
 The goal of the project was to route the balloons such that they would not crash under excessive windspeeds (15m/s was the threshold).
 
-The tutorial code was provided by Ruixiong from Alibaba's Big Data Analytics Division. The remainder of the code was developed by Paul Diemoz, Ilan Pillemer, Ann Cn and myself.
+The tutorial code was provided by Ruixiong from Alibaba's Big Data Analytics Division. The remainder of the code was developed by Paul Diemoz, Ilan Pillemer, Ann Cn and myself (participated in the Hackathon leaderboard as team galileo, and in the general leaderboard as team grey-london).
