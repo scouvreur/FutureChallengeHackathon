@@ -9,3 +9,9 @@ The training data set contained 10 forecasts of wind speed from Met Office model
 The goal of the project was to route the balloons such that they would not crash under excessive windspeeds (15m/s was the threshold).
 
 The tutorial code was provided by Ruixiong from Alibaba's Big Data Analytics Division. The remainder of the code was developed by Paul Diemoz, Ilan Pillemer, Ann Cn and myself (participated in the Hackathon leaderboard as team galileo, and in the general leaderboard as team grey-london).
+
+Sample plots of windspeeds at different times of the day:
+
+* [Day 2 Hour 3 Model 2](FutureChallengeHackathon/windMaps/Day-2-Hour-3-Model-2.pdf "Day 2 Hour 3 Model 2")
+* [Day 2 Hour 3 Model 5](FutureChallengeHackathon/windMaps/Day-2-Hour-3-Model-5.pdf "Day 2 Hour 3 Model 5")
+* [Day 2 Hour 3 Model 9](FutureChallengeHackathon/windMaps/Day-2-Hour-3-Model-9.pdf "Day 2 Hour 3 Model 9")
