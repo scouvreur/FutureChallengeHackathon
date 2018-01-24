@@ -6,16 +6,16 @@ import h5py
 import datetime
 from sklearn.metrics import mean_absolute_error
 
-citydata = pd.read_csv('cityData.csv')
-citydata
-
 def loadData():
     '''
     This function reads in all the CSV data and saves it to an
-    hdf5 file
+    hdf5 file - it takes around 23mins on average to run on a
+    dual processor workstation
     '''
-    global train, test
-    train = np.zeros((5,20-3+1,11,548,421)) # initialize an empty 5D tensor
+    global citydata, train, test
+    citydata = pd.read_csv('cityData.csv')
+
+    train = np.zeros((5,21-3+1,11,548,421)) # initialize an empty 5D tensor
     print('start processing traindata')
     with open('forecastDataforTraining.csv') as trainfile:
         for index,line in enumerate(trainfile):
@@ -83,64 +83,77 @@ def loadData():
                 print("found line with datatype error! skip this line")
                 continue
 
-def writeData():
+def saveData():
     '''
     This function writes all the data to an hdf5 file
     '''
     # write numpy arrary tensor into h5 format
     h5f = h5py.File('METdata.h5', 'w')
+    h5f.create_dataset('citydata', data=citydata)
     h5f.create_dataset('train', data=train)
     h5f.create_dataset('test', data=test)
     h5f.close()
 
 def readData():
     '''
-    This function reads in the hdf5 file
+    This function reads in the hdf5 file - it takes
+    around 3s on average to run on a
+    dual processor workstation
     '''
     # read h5 format back to numpy array
-    global train, test
+    global citydata, train, test
     h5f = h5py.File('METdata.h5', 'r')
+    citydata = h5f['citydata'][:]
     train = h5f['train'][:]
     test = h5f['test'][:]
     h5f.close()
 
 # loadData()
-# writeData()
+# saveData()
 
 readData()
 
-print(train.shape)
-
-print(548*421*18*5*10)
-
-plt.figure(figsize=(20,10))
-plt.imshow(train[0,0,0,:,:].T)
-for c,x,y in zip(citydata.cid,citydata.xid,citydata.yid):
-    if c == 0:
-        plt.plot(x-1,y-1,'yo')
+def plotWindMap(day, hour, model):
+    '''
+    This function takes as input from the user the day,
+    hour, and model number and plots a map of the wind
+    speed
+    '''
+    if (0 <= day <= 4) and (3 <= hour <= 20) and (0 <= model <= 10):
+        plt.title('Wind speed on Day {} at {:02d}:00\nModel {}'.format(day,hour,model))
+        plt.imshow(train[int(day),int(hour),int(model),:,:].T, cmap='bone')
+        plt.colorbar(ticks=[0, 10, 20], orientation='vertical')
+        for cid,xid,yid in citydata:
+            if cid == 0:
+                plt.plot(xid-1,yid-1,'yo')
+            else:
+                plt.plot(xid-1,yid-1,'ro')
+        plt.savefig('Day-{}-Hour-{}-Model-{}.pdf'.format(day,hour,model), format='pdf')
+        plt.show()
     else:
-        plt.plot(x-1,y-1,'ro')
-plt.show()
+        print('Please enter a day between 0 and 4')
+        print('Please enter an hour between 3 and 20')
+        print('Please enter a model between 0 and 10')
 
-plt.figure(figsize=(20,10))
-plt.imshow(train[0,0,10,:,:].T)
-for c,x,y in zip(citydata.cid,citydata.xid,citydata.yid):
-    if c == 0:
-        plt.plot(x-1,y-1,'yo')
-    else:
-        plt.plot(x-1,y-1,'ro')
-plt.show()
+# plt.figure(figsize=(20,10))
+# plt.imshow(train[0,0,10,:,:].T)
+# for c,x,y in zip(citydata.cid,citydata.xid,citydata.yid):
+#     if c == 0:
+#         plt.plot(x-1,y-1,'yo')
+#     else:
+#         plt.plot(x-1,y-1,'ro')
+# plt.show()
 
-train[0,0,10,:,:].T-train[0,0,0,:,:].T
+# train[0,0,10,:,:].T-train[0,0,0,:,:].T
 
-plt.figure(figsize=(20,10))
-plt.imshow(test[0,0,1,:,:].T)
-for c,x,y in zip(citydata.cid,citydata.xid,citydata.yid):
-    if c == 0:
-        plt.plot(x-1,y-1,'yo')
-    else:
-        plt.plot(x-1,y-1,'ro')
-plt.show()
+# plt.figure(figsize=(20,10))
+# plt.imshow(test[0,0,1,:,:].T)
+# for c,x,y in zip(citydata.cid,citydata.xid,citydata.yid):
+#     if c == 0:
+#         plt.plot(x-1,y-1,'yo')
+#     else:
+#         plt.plot(x-1,y-1,'ro')
+# plt.show()
 
 # citydata
 
