@@ -3,9 +3,25 @@ from keras import optimizers
 from keras import regularizers
 from keras.layers import Input, Dense, Conv2D, MaxPooling2D, UpSampling2D
 from keras import backend as K
-from tutorial import readData, saveData
+# from tutorial import readData, saveData
 import h5py
 from sklearn.metrics import mean_absolute_error
+
+def readData():
+    '''
+    This function reads in the hdf5 file - it takes
+    around 3s on average to run on a
+    dual processor workstation
+    '''
+    # read h5 format back to numpy array
+    global citydata
+    global train
+    global test
+    h5f = h5py.File('METdata.h5', 'r')
+    citydata = h5f['citydata'][:]
+    train = h5f['train'][:]
+    test = h5f['test'][:]
+    h5f.close()
 
 readData()
 
@@ -63,11 +79,13 @@ autoencoder.fit(train_set, train_label,
 
 # Autoencoder error
 
-1-(0.0309/valid_label.mean())
+print(1-(0.0309/valid_label.mean()))
 
 # Average model error
 
-mean_absolute_error(valid_set.mean(axis=1).flatten(),valid_label.flatten())
-1-(0.031123083900226757/valid_label.mean())
+print(mean_absolute_error(valid_set.mean(axis=1).flatten(),valid_label.flatten()))
+print(1-(0.031123083900226757/valid_label.mean()))
+
+autoencoder = np.zeros((5,18,548,421))
 
 # writeData()

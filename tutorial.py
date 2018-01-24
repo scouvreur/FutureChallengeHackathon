@@ -12,7 +12,9 @@ def loadData():
     hdf5 file - it takes around 23mins on average to run on a
     dual processor workstation
     '''
-    global citydata, train, test
+    global citydata
+    global train
+    global test
     citydata = pd.read_csv('cityData.csv')
 
     train = np.zeros((5,21-3+1,11,548,421)) # initialize an empty 5D tensor
@@ -101,7 +103,9 @@ def readData():
     dual processor workstation
     '''
     # read h5 format back to numpy array
-    global citydata, train, test
+    global citydata
+    global train
+    global test
     h5f = h5py.File('METdata.h5', 'r')
     citydata = h5f['citydata'][:]
     train = h5f['train'][:]
@@ -128,69 +132,14 @@ def plotWindMap(day, hour, model):
                 plt.plot(xid-1,yid-1,'yo')
             else:
                 plt.plot(xid-1,yid-1,'ro')
-        plt.savefig('Day-{}-Hour-{}-Model-{}.pdf'.format(day,hour,model), format='pdf')
+        plt.savefig('windMaps/Day-{}-Hour-{}-Model-{}.pdf'.format(day,hour,model), format='pdf')
         plt.show()
     else:
         print('Please enter a day between 0 and 4')
         print('Please enter an hour between 3 and 20')
         print('Please enter a model between 0 and 10')
 
-# plt.figure(figsize=(20,10))
-# plt.imshow(train[0,0,10,:,:].T)
-# for c,x,y in zip(citydata.cid,citydata.xid,citydata.yid):
-#     if c == 0:
-#         plt.plot(x-1,y-1,'yo')
-#     else:
-#         plt.plot(x-1,y-1,'ro')
-# plt.show()
-
-# train[0,0,10,:,:].T-train[0,0,0,:,:].T
-
-# plt.figure(figsize=(20,10))
-# plt.imshow(test[0,0,1,:,:].T)
-# for c,x,y in zip(citydata.cid,citydata.xid,citydata.yid):
-#     if c == 0:
-#         plt.plot(x-1,y-1,'yo')
-#     else:
-#         plt.plot(x-1,y-1,'ro')
-# plt.show()
-
-# citydata
-
-# # Machine Learning Example
-
-# train.shape
-# train[:,:,10,:,:]
-
-# for i in range(10):
-#     print mean_absolute_error(train[:,:,i,:,:].flatten(),train[:,:,10,:,:].flatten())
-
-# 1-(1.698811266478261/train[:,:,10,:,:].mean())
-
-# # Taken the average of 10 models as prediction value
-
-# train_set = train[:4,:,:10,:,:]
-# valid_set = train[4,:,:10,:,:]
-# train_label = train[:4,:,10,:,:]
-# valid_label = train[4,:,10,:,:]
-
-# mean_absolute_error(valid_set.mean(axis=1).flatten(),valid_label.flatten())
-# 1-(2.0349824438973374/valid_label.mean())
-
-# # Linear regression model
-
-# train_set_1 = np.column_stack((train_set[:,:,i,:,:].flatten() for i in range(10)))
-# valid_set_1 = np.column_stack((valid_set[:,i,:,:].flatten() for i in range(10)))
-
-# train_label_1 = train_label.flatten()
-# valid_label_1 = valid_label.flatten()
-
-# from sklearn.linear_model import LinearRegression
-# from sklearn.model_selection import cross_val_score
-
-# lr = LinearRegression(fit_intercept=True, normalize=True)
-# lr.fit(train_set_1,train_label_1)
-# mean_absolute_error(lr.predict(valid_set_1),valid_label_1)
+# plotWindMap(2,3,2)
 
 # # Route Planning
 # citydata
@@ -259,7 +208,6 @@ def plotWindMap(day, hour, model):
 #             print 'total time consumed %s'%(current_time-start_time)
 #             break
 #         current_time += datetime.timedelta(minutes=2)
-
 
 # citydata
 
