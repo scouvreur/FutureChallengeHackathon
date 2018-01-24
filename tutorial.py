@@ -117,6 +117,11 @@ def readData():
 
 readData()
 
+# Read in linear regression data
+# h5f = h5py.File('LinReg.h5', 'r')
+# linreg = h5f['linreg'][:]
+# h5f.close()
+
 def plotWindMap(day, hour, model):
     '''
     This function takes as input from the user the day,
@@ -132,14 +137,15 @@ def plotWindMap(day, hour, model):
                 plt.plot(xid-1,yid-1,'yo')
             else:
                 plt.plot(xid-1,yid-1,'ro')
-        plt.savefig('windMaps/Day-{}-Hour-{}-Model-{}.pdf'.format(day,hour,model), format='pdf')
+        # plt.savefig('windMaps/Day-{}-Hour-{}-Model-{}.pdf'.format(day,hour,model), format='pdf')
         plt.show()
     else:
         print('Please enter a day between 0 and 4')
         print('Please enter an hour between 3 and 20')
         print('Please enter a model between 0 and 10')
 
-# plotWindMap(2,3,2)
+# for i in range(17):
+#     plotWindMap(2,3+i,2)
 
 # # Route Planning
 # citydata

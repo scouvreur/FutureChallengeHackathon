@@ -79,13 +79,15 @@ autoencoder.fit(train_set, train_label,
 
 # Autoencoder error
 
-print(1-(0.0309/valid_label.mean()))
+# print(1-(0.0309/valid_label.mean()))
 
-# Average model error
+# # Average model error
 
-print(mean_absolute_error(valid_set.mean(axis=1).flatten(),valid_label.flatten()))
-print(1-(0.031123083900226757/valid_label.mean()))
+# print(mean_absolute_error(valid_set.mean(axis=1).flatten(),valid_label.flatten()))
+# print(1-(0.031123083900226757/valid_label.mean()))
 
-autoencoder = np.zeros((5,18,548,421))
+# autoencoder.predict()
+
+# autoencoder = np.zeros((5,18,548,421))
 
 # writeData()
