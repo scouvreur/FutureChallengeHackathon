@@ -15,3 +15,4 @@ Sample plots of windspeeds at the same time of day with different forecasting mo
 * [Day 2 Hour 3 Model 2](windMaps/Day-2-Hour-3-Model-2.pdf "Day 2 Hour 3 Model 2")
 * [Day 2 Hour 3 Model 5](windMaps/Day-2-Hour-3-Model-5.pdf "Day 2 Hour 3 Model 5")
 * [Day 2 Hour 3 Model 9](windMaps/Day-2-Hour-3-Model-9.pdf "Day 2 Hour 3 Model 9")
+* [Day 2 Hour 3 Linear Regression Model](windMaps/Day-2-Hour-3-Model-LinReg.pdf "Day 2 Hour 3 Linear Regression Model")
