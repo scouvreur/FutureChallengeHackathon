@@ -16,7 +16,7 @@ def readData():
     global train
     global test
     h5f = h5py.File('METdata.h5', 'r')
-    citydata = h5f['citydata'][:]
+    # citydata = h5f['citydata'][:]
     train = h5f['train'][:]
     test = h5f['test'][:]
     h5f.close()

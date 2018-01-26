@@ -3,5 +3,6 @@ forecastDataforTraining.csv
 insituMeasurementforTraining.csv
 METdata.h5
 LinReg.h5
+SGDReg.h5
 __pycache__/tutorial.cpython-35.pyc
 
