@@ -1,11 +1,27 @@
-import tutorial
+# import tutorial
 import numpy as np
 import h5py
 from sklearn.metrics import mean_absolute_error
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import cross_val_score
 
-tutorial.readData()
+def readData():
+    '''
+    This function reads in the hdf5 file - it takes
+    around 3s on average to run on a
+    dual processor workstation
+    '''
+    # read h5 format back to numpy array
+    global citydata
+    global train
+    global test
+    h5f = h5py.File('METdata.h5', 'r')
+    citydata = h5f['citydata'][:]
+    train = h5f['train'][:]
+    test = h5f['test'][:]
+    h5f.close()
+
+readData()
 
 model_MAE = {}
 for i in range(10):
@@ -25,12 +41,14 @@ valid_set = train[3:,:,:10,:,:]
 train_label = train[:3,:,10,:,:]
 valid_label = train[3:,:,10,:,:]
 
+test_set = test[:,:,:,:,:]
+
 # Linear regression model
 
 train_set_1 = np.column_stack((train_set[:,:,i,:,:].flatten() for i in range(10)))
 valid_set_1 = np.column_stack((valid_set[:,:,i,:,:].flatten() for i in range(10)))
+test_set_1 = np.column_stack((test_set[:,:,i,:,:].flatten() for i in range(10)))
 
-test_set_1 = test.flatten()
 train_label_1 = train_label.flatten()
 valid_label_1 = valid_label.flatten()
 
@@ -41,13 +59,7 @@ linreg_percent_error = 1 - (linreg_MAE/train[:,:,10,:,:].mean())
 
 print('The linear regression model has an accuracy of {:0.2f}%.'.format(100*linreg_percent_error))
 
-lr.predict(train_set_1)
-lr.predict(valid_set_1)
-lr.predict(train_set_1).shape
-lr.predict(valid_set_1).shape
-
-# linreg = np.concatenate((lr.predict(train_set_1), lr.predict(valid_set_1)), axis=0)
-Linreg = lr.predict(test_set_1)
+linreg = lr.predict(test_set_1)
 linreg = linreg.reshape(5,18,548,421)
 
 h5f = h5py.File('LinReg.h5', 'w')

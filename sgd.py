@@ -41,13 +41,7 @@ linreg_percent_error = 1 - (linreg_MAE/train[:,:,10,:,:].mean())
 
 print('The linear regression model has an accuracy of {:0.2f}%.'.format(100*linreg_percent_error))
 
-lr.predict(train_set_1)
-lr.predict(valid_set_1)
-lr.predict(train_set_1).shape
-lr.predict(valid_set_1).shape
-
-# linreg = np.concatenate((lr.predict(train_set_1), lr.predict(valid_set_1)), axis=0)
-Linreg = lr.predict(test_set_1)
+linreg = lr.predict(test_set_1)
 linreg = linreg.reshape(5,18,548,421)
 
 h5f = h5py.File('LinReg.h5', 'w')
