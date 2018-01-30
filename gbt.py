@@ -2,8 +2,9 @@
 import numpy as np
 import h5py
 from sklearn.metrics import mean_absolute_error
-from sklearn.linear_model.stochastic_gradient import SGDRegressor
-from sklearn.model_selection import cross_val_score
+from sklearn.linear_model import SGDRegressor
+from sklearn.ensemble import GradientBoostingRegressor
+from xgboost import XGBRegressor
 
 def readData():
     '''
@@ -44,26 +45,27 @@ valid_label = train[3:,:,10,:,:]
 
 test_set = test[:,:,:,:,:]
 
-# Stochastic gradient descent regression model
+# Gradient boosting regression model
 
-train_set_1 = np.column_stack((train_set[:,:,i,:,:].flatten() for i in range(10)))
-valid_set_1 = np.column_stack((valid_set[:,:,i,:,:].flatten() for i in range(10)))
-test_set_1 = np.column_stack((test_set[:,:,i,:,:].flatten() for i in range(10)))
+train_set = np.column_stack((train_set[:,:,i,:,:].flatten() for i in range(10)))
+valid_set = np.column_stack((valid_set[:,:,i,:,:].flatten() for i in range(10)))
+test_set = np.column_stack((test_set[:,:,i,:,:].flatten() for i in range(10)))
 
-train_label_1 = train_label.flatten()
-valid_label_1 = valid_label.flatten()
+train_label = train_label.flatten()
+valid_label = valid_label.flatten()
 
-sgd = SGDRegressor(fit_intercept=True, loss="huber", penalty="l2",
-				   tol=1e-6, max_iter=10000)
-sgd.fit(train_set_1,train_label_1)
-sgdreg_MAE = mean_absolute_error(sgd.predict(valid_set_1),valid_label_1)
-sgdreg_percent_error = 1 - (sgdreg_MAE/train[:,:,10,:,:].mean())
+# model = XGBRegressor()
+model = SGDRegressor(loss='huber', max_iter=1000, tol=1e-3)
 
-print('The stochastic gradient descent regressor model has an accuracy of {:0.2f}%.'.format(100*sgdreg_percent_error))
+model.fit(train_set,train_label)
+MAE = mean_absolute_error(model.predict(valid_set),valid_label)
+error = 1 - (MAE/train[:,:,10,:,:].mean())
 
-SGDReg = sgd.predict(test_set_1)
-SGDReg = SGDReg.reshape(5,18,548,421)
+print('The model has an accuracy of {:0.2f}%.'.format(100*error))
 
-h5f = h5py.File('SGDReg.h5', 'w')
-h5f.create_dataset('SGDReg', data=SGDReg)
+GBReg = model.predict(test_set)
+GBReg = GBReg.reshape(5,18,548,421)
+
+h5f = h5py.File('GBReg.h5', 'w')
+h5f.create_dataset('GBReg', data=GBReg)
 h5f.close()
