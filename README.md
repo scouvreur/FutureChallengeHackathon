@@ -2,7 +2,10 @@
 ##  By Alibaba Cloud and the Met Office
 ### Jan 20th 2018
 
-Highest ranking achieved was 100 / 61792 on [(26th January 2018)](https://tianchi.aliyun.com/competition/rankingList.htm?spm=5176.11165261.5678.4.7c1a54e0HN1zFj&raceId=231622)
+Highest ranking achieved was 100 / 60600 on [(26th January 2018)](https://tianchi.aliyun.com/competition/rankingList.htm?spm=5176.11165261.5678.4.7c1a54e0HN1zFj&raceId=231622)
+
+![alt text](screenshots/score.png "Score")
+![alt text](screenshots/leaderboard.png "Global leaderboard position")
 
 The dataset was provided by [Alibaba Cloud](bit.ly/AliCloudHackathon) and the Met Office.
 
