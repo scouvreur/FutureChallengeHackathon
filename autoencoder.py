@@ -3,13 +3,26 @@ from keras import optimizers
 from keras import regularizers
 from keras.layers import Input, Dense, Conv2D, MaxPooling2D, UpSampling2D
 from keras import backend as K
-import tutorial
 import h5py
 from sklearn.metrics import mean_absolute_error
 
-tutorial.readData()
+def readData():
+    '''
+    This function reads in the hdf5 file - it takes
+    around 3s on average to run on a
+    dual processor workstation
+    '''
+    # read h5 format back to numpy array
+    global citydata
+    global train
+    global test
+    h5f = h5py.File('METdata.h5', 'r')
+    # citydata = h5f['citydata'][:]
+    train = h5f['train'][:]
+    test = h5f['test'][:]
+    h5f.close()
 
-548*421
+readData()
 
 # This is the size of our encoded representations
 

@@ -1,9 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import os
 import h5py
-import datetime
 from sklearn.metrics import mean_absolute_error
 
 def loadData():
@@ -13,17 +11,22 @@ def loadData():
     dual processor workstation
     '''
     global citydata
-    global train
-    global test
+    global train_wind
+    global train_rain
+    global test_wind
+    global test_rain
     citydata = pd.read_csv('cityData.csv')
 
-    train = np.zeros((5,21-3+1,11,548,421)) # initialize an empty 5D tensor
+    # initialize an empty 5D tensor
+    train_wind = np.zeros((5,19,11,548,421))
+    train_rain = np.zeros((5,19,11,548,421))
+
     print('start processing traindata')
     with open('forecastDataforTraining.csv') as trainfile:
         for index,line in enumerate(trainfile):
             # traindata format
-            # xid,yid,date_id,hour,model,wind
-            # 1,1,1,3,1,13.8
+            # xid,yid,date_id,hour,model,wind,rainfall
+            # 1,1,1,3,1,13.8,41.4
 
             traindata = line.split(',')
             try:
@@ -33,7 +36,9 @@ def loadData():
                 h = int(traindata[3])
                 m = int(traindata[4])
                 w = float(traindata[5])
-                train[d-1,h-3,m-1,x-1,y-1] = w # write values into tensor
+                r = float(traindata[6])
+                train_wind[d-1,h-3,m-1,x-1,y-1] = w
+                train_rain[d-1,h-3,m-1,x-1,y-1] = r
 
                 if index%1000000==0:
                     print(index,"lines have been processed")
@@ -45,8 +50,8 @@ def loadData():
     with open('insituMeasurementforTraining.csv') as labelfile:
         for index,line in enumerate(labelfile):
             # labeldata format
-            # xid,yid,date_id,hour,wind
-            # 1,1,1,3,12.8
+            # xid,yid,date_id,hour,wind,rainfall
+            # 1,1,1,3,12.8,1.1
             labeldata = line.split(',')
             try:
                 lx = int(labeldata[0])
@@ -54,20 +59,25 @@ def loadData():
                 ld = int(labeldata[2])
                 lh = int(labeldata[3])
                 lw = float(labeldata[4])
-                train[ld-1,lh-3,10,lx-1,ly-1] = lw
+                lr = float(labeldata[5])
+                train_wind[ld-1,lh-3,10,lx-1,ly-1] = lw
+                train_rain[ld-1,lh-3,10,lx-1,ly-1] = lr
+
                 if index%1000000==0:
                     print(index,"lines have been processed")
             except ValueError:
                 print("found line with datatype error! skip this line")
                 continue
 
-    test = np.zeros((5,20-3+1,10,548,421))
+    test_wind = np.zeros((5,18,10,548,421))
+    test_rain = np.zeros((5,18,10,548,421))
+
     print('start processing testdata')
     with open('forecastDataforTesting.csv') as testfile:
         for index,line in enumerate(testfile):
             # testdata format
-            # xid,yid,date_id,hour,model,wind
-            # 1,1,1,3,1,13.8
+            # xid,yid,date_id,hour,model,wind,rainfall
+            # 1,1,1,3,1,13.8,1.9
 
             testdata = line.split(',')
             try:
@@ -77,7 +87,9 @@ def loadData():
                 h = int(testdata[3])
                 m = int(testdata[4])
                 w = float(testdata[5])
-                test[d-6,h-3,m-1,x-1,y-1] = w
+                r = float(testdata[6])
+                test_wind[d-6,h-3,m-1,x-1,y-1] = w
+                test_rain[d-6,h-3,m-1,x-1,y-1] = r
 
                 if index%1000000==0:
                     print(index,"lines have been processed")
@@ -92,8 +104,10 @@ def saveData():
     # write numpy arrary tensor into h5 format
     h5f = h5py.File('METdata.h5', 'w')
     h5f.create_dataset('citydata', data=citydata)
-    h5f.create_dataset('train', data=train)
-    h5f.create_dataset('test', data=test)
+    h5f.create_dataset('train_wind', data=train_wind)
+    h5f.create_dataset('train_rain', data=train_rain)
+    h5f.create_dataset('test_wind', data=test_wind)
+    h5f.create_dataset('test_rain', data=test_rain)
     h5f.close()
 
 def readData():
@@ -104,23 +118,21 @@ def readData():
     '''
     # read h5 format back to numpy array
     global citydata
-    global train
-    global test
+    global train_wind
+    global train_rain
+    global test_wind
+    global test_rain
     h5f = h5py.File('METdata.h5', 'r')
     citydata = h5f['citydata'][:]
-    train = h5f['train'][:]
-    test = h5f['test'][:]
+    train_wind = h5f['train_wind'][:]
+    train_rain = h5f['train_rain'][:]
+    test_wind = h5f['test_wind'][:]
+    test_rain = h5f['test_rain'][:]
     h5f.close()
 
-# loadData()
-# saveData()
-
+loadData()
+saveData()
 readData()
-
-# Read in linear regression data
-# h5f = h5py.File('LinReg.h5', 'r')
-# linreg = h5f['linreg'][:]
-# h5f.close()
 
 def plotWindMap(day, hour, model):
     '''
@@ -143,159 +155,3 @@ def plotWindMap(day, hour, model):
         print('Please enter a day between 0 and 4')
         print('Please enter an hour between 3 and 20')
         print('Please enter a model between 0 and 10')
-
-# for i in range(17):
-#     plotWindMap(2,3+i,2)
-
-# # Route Planning
-# citydata
-
-# def manhatten_distance(a,b):
-#     #a,b should be a tuple with (x,y) as coordinate
-#     return abs(a[0]-b[0])+abs(a[1]-b[1])
-
-# def move(pos,command):
-#     if command == 'stay':
-#         outpos = pos
-#     elif command == 'up':
-#         outpos = (pos[0],pos[1]+1)
-#     elif command == 'down':
-#         outpos = (pos[0],pos[1]-1)
-#     elif command == 'left':
-#         outpos = (pos[0]-1,pos[1])
-#     elif command == 'right':
-#         outpos = (pos[0]+1,pos[1])
-#     else:
-#         print 'unknown command'
-#         raise
-#     return outpos
-
-# start_pos = (142,328)
-# end_pos = (199,371)
-# weather_matrix = train[1,:,10,:,:]
-# start_time = datetime.datetime(2017,1,1,hour=3,minute=0)
-# current_time = start_time
-# current_pos = start_pos
-# state_dict = {'stay':0,'up':0,'down':0,'left':0,'right':0}
-
-# # greedy policy, choose move that minimize the manhatten_distance, if cant make it, then wait
-# while True:
-#     if weather_matrix[start_time.hour-3,start_pos[0]-1,start_pos[1]-1] >= 15:
-#         print 'can not start, just crush'
-#         break
-#     else:
-#         print 'current pos is now at %s'%(current_pos,)
-#         print 'current time is now at %s'%(current_time)
-#         # update the dict using the manhatten_distance
-#         for k in state_dict.keys():
-#             state_dict[k] = manhatten_distance(end_pos,move(current_pos,k))
-#         # sorted the dict using the manhatten_distance
-#         sorted_dict = sorted(state_dict.items(), key=lambda x: x[1])
-
-#         # check weather is good
-#         if weather_matrix[current_time.hour-3,move(current_pos,sorted_dict[0][0])[0]-1,move(current_pos,sorted_dict[0][0])[1]-1] < 15:
-#             current_pos = move(current_pos,sorted_dict[0][0])
-#             print 'action %s is executed!'%(sorted_dict[0][0])
-#             print 'current pos is now at %s'%(current_pos,)
-
-#         elif weather_matrix[current_time.hour-3,move(current_pos,sorted_dict[1][0])[0]-1,move(current_pos,sorted_dict[1][0])[1]-1] < 15:
-#             current_pos = move(current_pos,sorted_dict[1][0])
-#             print 'action %s is executed!'%(sorted_dict[1][0])
-#             print 'current pos is now at %s'%(current_pos,)
-
-#         else:
-#             current_pos = move(current_pos,sorted_dict[2][0])
-#             print 'action %s is executed!'%(sorted_dict[2][0])
-#             print 'current pos is now at %s'%(current_pos,)
-
-#         # check weather the balloon is at the end pos
-#         if current_pos == end_pos:
-#             print 'Successfully arrived at end_pos %s'%(end_pos,)
-#             print 'total time consumed %s'%(current_time-start_time)
-#             break
-#         current_time += datetime.timedelta(minutes=2)
-
-# citydata
-
-# start_pos = (142,328)
-# end_pos_list = [(84,203),(199,371),(140,234),(236,241),(315,281),(358,207),(363,237),(423,266),(125,375),(189,274)]
-# weather_matrix = test[:,:,:10,:,:].mean(axis=2)
-# start_time = datetime.datetime(2017,1,1,hour=3,minute=0)
-# end_time = datetime.datetime(2017,1,1,hour=21,minute=0)
-# current_time = start_time
-# current_pos = start_pos
-# state_dict = {'stay':0,'up':0,'down':0,'left':0,'right':0}
-
-# # greedy policy, choose move that minimize the manhatten_distance, if cant make it, then wait
-# with open('log.csv', 'a') as log:
-#     for day in range(5):
-#         print 'day %i is started!'%(day)
-
-#         for pos_index,end_pos in enumerate(end_pos_list):
-#             print 'Now end pos is %s'%(end_pos,)
-
-#             log.write(str(pos_index+1)+','+str(day+6)+','+str(current_time.time())[:-3]+','+str(current_pos[0])+','+str(current_pos[1])+'\n')
-
-#             while True:
-#                 if weather_matrix[day,start_time.hour-3,start_pos[0]-1,start_pos[1]-1] >= 15:
-#                     print 'can not start, just crush'
-#                     break
-#                 else:
-#                     #print 'current time is now at %s'%(current_time)
-#                     # update the dict using the manhatten_distance
-#                     for k in state_dict.keys():
-#                         state_dict[k] = manhatten_distance(end_pos,move(current_pos,k))
-#                     # sorted the dict using the manhatten_distance
-#                     sorted_dict = sorted(state_dict.items(), key=lambda x: x[1])
-#                     #print sorted_dict
-
-#                     # check weather is good
-#                     if weather_matrix[day,current_time.hour-3,move(current_pos,sorted_dict[0][0])[0]-1,move(current_pos,sorted_dict[0][0])[1]-1] < 14:
-#                         current_pos = move(current_pos,sorted_dict[0][0])
-#                         #print 'action %s is executed!'%(sorted_dict[0][0])
-#                         #print 'current pos is now at %s'%(current_pos,)
-
-#                     elif weather_matrix[day,current_time.hour-3,move(current_pos,sorted_dict[1][0])[0]-1,move(current_pos,sorted_dict[1][0])[1]-1] < 14:
-#                         current_pos = move(current_pos,sorted_dict[1][0])
-#                         #print 'action %s is executed!'%(sorted_dict[1][0])
-#                         #print 'current pos is now at %s'%(current_pos,)
-
-#                     else:
-#                         current_pos = move(current_pos,sorted_dict[2][0])
-#                         #print 'action %s is executed!'%(sorted_dict[2][0])
-#                         #print 'current pos is now at %s'%(current_pos,)
-
-
-#                     # check weather the balloon is at the end pos
-#                     if current_pos != end_pos:
-#                         current_time += datetime.timedelta(minutes=2)
-#                         log.write(str(pos_index+1)+','+str(day+6)+','+str(current_time.time())[:-3]+','+str(current_pos[0])+','+str(current_pos[1])+'\n')
-#                     else:
-#                         print 'Successfully arrived at end_pos %s'%(end_pos,)
-#                         print 'total time consumed %s'%(current_time-start_time)
-#                         current_time += datetime.timedelta(minutes=2)
-#                         log.write(str(pos_index+1)+','+str(day+6)+','+str(current_time.time())[:-3]+','+str(current_pos[0])+','+str(current_pos[1])+'\n')
-#                         current_time = start_time
-#                         current_pos = start_pos
-
-#                         break
-#                     # check weather time is up
-#                     if current_time == end_time:
-#                         print 'time is up and I cant make it'
-#                         current_time = start_time
-#                         current_pos = start_pos
-#                         break
-#                 continue
-
-# test_binary = weather_matrix < np.ones(weather_matrix.shape)*14
-# test_binary
-# test_binary[0,0,141,347]
-
-# plt.figure(figsize=(20,10))
-# plt.imshow(test_binary[0,0,:,:].T)
-# for c,x,y in zip(citydata.cid,citydata.xid,citydata.yid):
-#     if c == 0:
-#         plt.plot(x-1,y-1,'bo')
-#     else:
-#         plt.plot(x-1,y-1,'ro')
-# plt.show()
